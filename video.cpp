@@ -1,0 +1,227 @@
+#define CV_NO_BACKWARD_COMPATIBILITY
+
+#include "cv.h"
+#include "highgui.h"
+#include <stdio.h>
+#include <ctype.h>
+
+#include <assert.h>
+#include <unistd.h>
+#include <malloc.h>
+
+#include "mouse.hpp"
+
+
+coordinates mouseDown;
+coordinates mouseUp;
+int checkROI;
+IplImage* imgTemplate;
+
+IplImage *getThreshold(IplImage *original)
+{
+    IplImage* imgHSV = cvCreateImage(cvGetSize(original), 8, 3);
+    cvCvtColor(original, imgHSV, CV_BGR2HSV);
+    IplImage* imgThreshed = cvCreateImage(cvGetSize(original), 8, 1);
+    cvInRangeS(imgHSV, cvScalar(0,30,60), cvScalar(20, 150, 255), imgThreshed);
+    return imgThreshed;
+}
+
+coordinates getMoments(IplImage *img)
+{
+    coordinates pos;
+    double moment01, moment10, area;
+    CvMoments *moments = (CvMoments*)malloc(sizeof(CvMoments));
+    cvMoments(img, moments, 1);
+    
+    moment10=cvGetSpatialMoment(moments, 1, 0);
+    moment01=cvGetSpatialMoment(moments, 0, 1);
+
+    area = cvGetCentralMoment(moments, 0, 0);
+   
+    pos.x = moment10/area;
+    pos.y = moment01/area;
+
+    return pos;
+}
+
+void mouseHandler(int event, int x, int y, int flags, void *param)
+{
+    switch(event) {
+        /* left button down */
+        case CV_EVENT_LBUTTONDOWN:
+	    mouseDown.x=x;
+	    mouseDown.y=y;
+	    mouseUp.x=x;
+	    mouseUp.y=y;
+	    checkROI=1;
+            fprintf(stdout, "Left button down (%d, %d).\n", x, y);
+            break;
+
+       case CV_EVENT_LBUTTONUP:
+	    mouseUp.x=x;
+	    mouseUp.y=y;
+	    checkROI=-1;
+            fprintf(stdout, "Left button up (%d, %d).\n", x, y);
+            break;
+
+	    
+        case CV_EVENT_MOUSEMOVE:
+	    if (checkROI!=0)
+	    {
+	        mouseUp.x=x;
+	        mouseUp.y=y;
+	    }
+
+            break;
+    }
+}
+
+IplImage *saveTemplate(CvCapture* capture )
+{
+  checkROI=0;
+  IplImage* temFrame=0;
+  IplImage* imgTemplate=NULL;
+  int c;
+  cvNamedWindow( "Object", 1 );
+  cvNamedWindow( "Template", 1 );
+  cvSetMouseCallback( "Object", mouseHandler, NULL );
+  temFrame = cvQueryFrame( capture );
+    if( !temFrame ){
+       return imgTemplate;
+    }
+    for(;;)
+    {
+        temFrame = cvQueryFrame( capture );
+	if (checkROI==1){
+	    cvRectangle(temFrame,
+		    cvPoint(mouseDown.x, mouseDown.y),
+		    cvPoint(mouseUp.x, mouseUp.y),
+		    cvScalar(0, 0, 255, 0), 2, 8, 0);
+	    
+	}
+	else if (checkROI==-1)
+	{
+	  fprintf(stdout, "Points: (%f, %f, %f, %f).\n",mouseDown.x, mouseDown.y,mouseUp.x, mouseUp.y);
+	  fprintf(stdout, "El tamaño es (%f, %f).\n",mouseDown.x-mouseUp.x, mouseDown.y- mouseUp.y);
+	  cvSetImageROI(temFrame, cvRect(mouseDown.x, mouseDown.y,mouseUp.x-mouseDown.x, mouseUp.y- mouseDown.y));
+          imgTemplate = cvCreateImage(cvGetSize(temFrame), temFrame->depth, temFrame->nChannels);
+          cvCopy(temFrame, imgTemplate, NULL);
+          cvResetImageROI(temFrame);
+	  
+	  
+	  
+	  cvShowImage("Template", imgTemplate);
+ 
+	  break;
+	}
+
+	cvShowImage("Object", temFrame);
+	c = cvWaitKey(30);
+        if( (char) c == 27 )
+            break;
+    }
+    cvDestroyWindow("Template");
+    cvDestroyWindow("Object");
+    return imgTemplate;
+}
+
+int main_loop( CvCapture* capture, IplImage *imgTemplate )
+{
+
+    IplImage* imgResult= NULL;
+    /*IplImage* imgFiltered;
+    IplImage* imgThreshed;*/
+
+    cvNamedWindow( "Tracking", 1 );
+
+    CvSize resolution;
+    CCursor mouse;
+
+    coordinates pos,prevPos;
+    
+    pos.x=0;
+    pos.y=0;
+    prevPos.x=0;
+    prevPos.y=0;
+
+    int c;
+    IplImage* frame = 0;
+    frame = cvQueryFrame( capture );
+    if( !frame ){
+       return -1;
+    }
+    resolution=cvGetSize(frame);
+    if (!imgResult)
+    {
+      //imgFiltered = cvCreateImage(cvGetSize(frame), 8, 3);
+      imgResult = cvCreateImage(cvSize(resolution.width-imgTemplate->width+1,resolution.height-imgTemplate->height+1), IPL_DEPTH_32F, 1);
+      cvZero(imgResult);
+    }
+    
+        
+    for(;;)
+    {
+
+        frame = cvQueryFrame( capture );
+	  
+	/*Color filter code
+	  imgThreshed=getThreshold(frame);
+	 cvZero(imgFiltered);
+         cvOrS(frame, CvScalar(),imgFiltered, imgThreshed);
+         cvMatchTemplate(imgFiltered, imgTemplate, imgResult, CV_TM_CCORR_NORMED);*/
+  
+        cvMatchTemplate(frame, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+	
+	double min_val=0, max_val=0;
+        CvPoint min_loc, max_loc;
+        cvMinMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
+	//printf("%f\n", max_val);
+	if (max_val>=0.95)
+	{
+	    cvRectangle(frame, max_loc, cvPoint(max_loc.x+imgTemplate->width, max_loc.y+imgTemplate->height), cvScalar(0), 1);
+	    cvCircle(frame, cvPoint(max_loc.x+(imgTemplate->width/2), max_loc.y+(imgTemplate->height/2)),5, cvScalar(0), -1);
+
+        
+	
+	    prevPos.x = pos.x;
+	    prevPos.y = pos.y;
+	    pos.x=float(1)-float(max_loc.x+(imgTemplate->width/2))/resolution.width;
+	    pos.y=float(max_loc.y+(imgTemplate->height/2))/resolution.height;
+	    //printf("Movemos a : %f,%f\n",pos.x,pos.y);
+	    mouse.setAbsPercentPosition(pos);
+	}
+	c = cvWaitKey(30);
+        if( (char) c == 27 )
+            break;
+	//cvShowImage( "ColorFilter", imgFiltered );
+	cvShowImage( "Tracking", frame );
+	
+    }
+
+    cvDestroyWindow("Tracking");
+
+    return 0;
+}
+
+int main( int argc, char** argv )
+{
+    CvCapture* capture = 0;
+
+    if( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
+        capture = cvCaptureFromCAM( argc == 2 ? argv[1][0] - '0' : 1 );
+
+    if( !capture )
+    {
+        fprintf(stderr,"Could not initialize capturing...\n");
+        return -1;
+    }
+    
+    IplImage *object=saveTemplate(capture);
+    if( object )
+    {
+       main_loop(capture,object);
+    }
+    
+    cvReleaseCapture( &capture );
+    return 0;
+}
