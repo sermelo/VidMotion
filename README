@@ -1,7 +1,45 @@
+VidMotion v0.1
+24-12-2012
+
+=== Copyright ===
+Author & copyright (c) 2012: Sergio Merino Alonso
+
+=== License ===
+GPLv3
+
+=== Description  ===
+Ony tested in Linux
+Alternative way to move the mouse using a webcam, and an object to track
+This is a software under devlopment. So don't expect to replece your mouse with the program at the moment
+
+=== Build Dependencies ===
+OpenCV
+X11
+
+=== Compile ===
+make
+
+=== Use ===
+Execute the "control"
+
+Step 1:
+    Choose from the screen a region where the object to track is located.
+    For now you can only choose the region from up left to down right
+    For example: A hand
+
+Step 2: 
+    Move the hand and you will see the mouse moving
+    It's Important to keep the object in the same position and at the same distance
 
 
-TODO
-Test Blur
-Click functionality
+=== Changelog ===
+VidMotion v0.1
+	* First release
+
+=== TODO ===
+Test with blur template
+Add Click functionality
 Customize range in which to detect
-Select Rectangule in any direction
+Select Rectangule template in any direction
+Adaptative template
+
