@@ -21,12 +21,13 @@ position CTemplate::mouseDown;
 position CTemplate::mouseUp;
 int CTemplate::checkROI;
 
-CTemplate::CTemplate(CvCapture* capture, bool colorFiler)
+CTemplate::CTemplate(CvCapture* capture, bool colorFilter)
 {
   checkROI=0;
   IplImage* temFrame=NULL;
   imgTemplate=NULL;
   int c;
+  activeColorFilter=colorFilter;
   cvNamedWindow( "Camera", 1 );
   cvSetMouseCallback( "Camera", mouseHandler, NULL );
     for(;;)
@@ -47,11 +48,19 @@ CTemplate::CTemplate(CvCapture* capture, bool colorFiler)
 	  PRINT(mouseUp.y);
 	  cvSetImageROI(temFrame, cvRect(mouseDown.x, mouseDown.y,mouseUp.x-mouseDown.x, mouseUp.y- mouseDown.y));
           imgTemplate = cvCreateImage(cvGetSize(temFrame), temFrame->depth, temFrame->nChannels);
-          cvCopy(temFrame, imgTemplate, NULL);
+
+          if (activeColorFilter)
+          {
+               IplImage* imgFiltered;
+               imgFiltered = getFilteredImage(temFrame);
+               imgTemplate=imgFiltered;
+               //cvCopy(imgFiltered, imgTemplate, NULL);
+          }
+          else
+          {
+              cvCopy(temFrame, imgTemplate, NULL);
+          }
           cvResetImageROI(temFrame);
-	  
-	  
- 
 	  break;
 	}
 	cvShowImage("Camera", temFrame);
@@ -73,16 +82,24 @@ CTemplate::~CTemplate()
   cvReleaseImage(&imgTemplate);
 }
 
-IplImage *CTemplate::getThreshold(IplImage *original)
+IplImage *CTemplate::getFilteredImage(IplImage *original)
 {
     IplImage* imgHSV = cvCreateImage(cvGetSize(original), 8, 3);
-    cvCvtColor(original, imgHSV, CV_BGR2HSV);
+    IplImage* imgFiltered = cvCreateImage(cvGetSize(original), 8, 3);
     IplImage* imgThreshed = cvCreateImage(cvGetSize(original), 8, 1);
+
+    cvZero(imgFiltered);
+
+    cvCvtColor(original, imgHSV, CV_BGR2HSV);
     cvInRangeS(imgHSV, cvScalar(0,30,60), cvScalar(20, 150, 255), imgThreshed);
+    cvOrS(original, CvScalar(),imgFiltered, imgThreshed);
+
     cvReleaseImage(&imgHSV);
-    return imgThreshed;
+    cvReleaseImage(&imgThreshed);
+    return imgFiltered;
 }
 
+//Obsolete funcion of the pre-first version
 position CTemplate::getMoments(IplImage *img)
 {
     position pos;
@@ -148,24 +165,26 @@ position CTemplate::getNewPosition(IplImage * frame)
     CvPoint min_loc, max_loc;
     CvSize resolution;
     position pos;
-    
-    	/*Color filter code
-	 IplImage* imgFiltered;
-         IplImage* imgThreshed;
-         imgFiltered = cvCreateImage(cvGetSize(frame), 8, 3);
-	  imgThreshed=getThreshold(frame);
-	 cvZero(imgFiltered);
-         cvOrS(frame, CvScalar(),imgFiltered, imgThreshed);
-         cvMatchTemplate(imgFiltered, imgTemplate, imgResult, CV_TM_CCORR_NORMED);*/
-	
     resolution=cvGetSize(frame);
+
     imgResult = cvCreateImage(cvSize(resolution.width-imgTemplate->width+1,resolution.height-imgTemplate->height+1), IPL_DEPTH_32F, 1);
     cvZero(imgResult);
-    cvMatchTemplate(frame, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+  
+    //Color filter code
+    if (activeColorFilter)
+    {
+	IplImage* imgFiltered;
+        imgFiltered = getFilteredImage(frame);
+        cvMatchTemplate(imgFiltered, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+        cvReleaseImage(&imgFiltered);
+    }
+    else{	
+        cvMatchTemplate(frame, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+    }
     cvMinMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
     PRINT(max_val);
     //printf("%f\n", max_val);
-    if (max_val>=0.95)
+    if ((max_val>=0.95 && !activeColorFilter) || (max_val>=0.40 && activeColorFilter))
     {
         pos.x=float(max_loc.x+(imgTemplate->width/2));
 	pos.y=float(max_loc.y+(imgTemplate->height/2));

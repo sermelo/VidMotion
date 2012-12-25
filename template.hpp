@@ -50,13 +50,13 @@ class CTemplate{
       static position mouseUp;
       static int checkROI;
       IplImage* imgTemplate;
-      bool skinColorFilter;
-      IplImage *getThreshold(IplImage *original);
+      bool activeColorFilter;
+      IplImage *getFilteredImage(IplImage *original);
       position getMoments(IplImage *img);
       static void mouseHandler(int event, int x, int y, int flags, void *param);
       
    public:
-      CTemplate(CvCapture* capture,bool colorFiler=false );
+      CTemplate(CvCapture* capture,bool colorFilter=false );
       ~CTemplate();
       position getNewPosition(IplImage * frame);
       CvSize getSize();
