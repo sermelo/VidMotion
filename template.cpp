@@ -22,6 +22,7 @@ position CTemplate::mouseUp;
 int CTemplate::checkROI;
 
 
+
 IplImage *CTemplate::getThreshold(IplImage *original)
 {
     IplImage* imgHSV = cvCreateImage(cvGetSize(original), 8, 3);
@@ -90,8 +91,6 @@ CTemplate::CTemplate(CvCapture* capture )
   cvNamedWindow( "Object", 1 );
   cvNamedWindow( "Template", 1 );
   cvSetMouseCallback( "Object", mouseHandler, NULL );
-  temFrame = cvQueryFrame( capture );
-  assert(!temFrame);
     for(;;)
     {
         temFrame = cvQueryFrame( capture );
@@ -128,6 +127,10 @@ CTemplate::CTemplate(CvCapture* capture )
 
 }
 
+CvSize CTemplate::getSize(){
+  
+  return cvGetSize(imgTemplate);
+}
 position CTemplate::getNewPosition(IplImage * frame)
 {
     IplImage* imgResult=NULL;
