@@ -42,6 +42,7 @@ VidMotion v0.0.1
 	* First release
 
 === TODO ===
+Allow user to change template
 Add optional color filter
 Test with blur template
 Add Click functionality
