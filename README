@@ -1,5 +1,5 @@
-VidMotion v0.0.1
-24-12-2012
+VidMotion v0.0.2
+25-12-2012
 
 === Copyright ===
 Author & copyright (c) 2012: Sergio Merino Alonso
@@ -10,7 +10,8 @@ GPLv3
 === Description  ===
 Ony tested in Linux
 Alternative way to move the mouse using a webcam, and an object to track
-This is a software under devlopment. So don't expect to replece your mouse with the program at the moment
+This is a software under devlopment. So don't expect to replece your mouse 
+with the program at the moment
 
 === Build Dependencies ===
 OpenCV
@@ -20,7 +21,8 @@ X11
 make
 
 === Use ===
-Execute the "control". It admit a parameter with the number of the video device. Default one is 0
+Execute the "control". It admit a parameter with the number of the video device. 
+Default one is 0
 
 Step 1:
     Choose from the screen a region where the object to track is located.
@@ -33,6 +35,9 @@ Step 2:
 
 
 === Changelog ===
+VidMotion v0.0.2
+        * Solved some memory leaks
+	* Reestructured all the code
 VidMotion v0.0.1
 	* First release
 
