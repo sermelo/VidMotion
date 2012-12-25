@@ -51,8 +51,13 @@ class CTemplate{
       static int checkROI;
       IplImage* imgTemplate;
       bool activeColorFilter;
+      CvScalar lowFilter;
+      CvScalar highFilter;
+      IplImage *getFilteredImageSkin(IplImage *original);
       IplImage *getFilteredImage(IplImage *original);
+      IplImage *getFilteredImage(IplImage *original,CvScalar lowr, CvScalar high);
       position getMoments(IplImage *img);
+      void createHSVFilter(IplImage *img);
       static void mouseHandler(int event, int x, int y, int flags, void *param);
       
    public:

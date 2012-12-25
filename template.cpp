@@ -61,26 +61,21 @@ CTemplate::CTemplate(CvCapture* capture, bool colorFilter)
               mouseUp.y=mouseDown.y;
               mouseDown.y=aux;
           }
-          
 	  PRINT(mouseDown.x);
 	  PRINT(mouseDown.y);
 	  PRINT(mouseUp.x);
 	  PRINT(mouseUp.y);
 	  cvSetImageROI(temFrame, cvRect(mouseDown.x, mouseDown.y,mouseUp.x-mouseDown.x, mouseUp.y- mouseDown.y));
           imgTemplate = cvCreateImage(cvGetSize(temFrame), temFrame->depth, temFrame->nChannels);
-
+          cvCopy(temFrame, imgTemplate, NULL);
+          cvResetImageROI(temFrame); 
           if (activeColorFilter)
           {
+               createHSVFilter(temFrame);
                IplImage* imgFiltered;
-               imgFiltered = getFilteredImage(temFrame);
+               imgFiltered = getFilteredImage(imgTemplate);
                imgTemplate=imgFiltered;
-               //cvCopy(imgFiltered, imgTemplate, NULL);
           }
-          else
-          {
-              cvCopy(temFrame, imgTemplate, NULL);
-          }
-          cvResetImageROI(temFrame);
 	  break;
 	}
 	cvShowImage("Camera", temFrame);
@@ -102,8 +97,81 @@ CTemplate::~CTemplate()
   cvReleaseImage(&imgTemplate);
 }
 
-//This funcion filter an image
+//Create a customize HSV filter
+void CTemplate::createHSVFilter(IplImage *img)
+{
+int LHue=0;
+int LSat=0;
+int LVal=0;
+int HHue=255;
+int HSat=255;
+int HVal=255;
+int c;
+IplImage * modifiedImg;
+//modifiedImg=cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
+
+cvNamedWindow( "HSV Filter", 0 );
+cvResizeWindow("HSV Filter", 1200, 680);
+cvCreateTrackbar("Min Hue", "HSV Filter", &LHue, 255, NULL);
+cvCreateTrackbar("Min Sat", "HSV Filter", &LSat, 255, NULL);
+cvCreateTrackbar("Min Val", "HSV Filter", &LVal, 255, NULL);
+cvCreateTrackbar("Max Hue", "HSV Filter", &HHue, 255, NULL);
+cvCreateTrackbar("Max Sat", "HSV Filter", &HSat, 255, NULL);
+cvCreateTrackbar("Max Val", "HSV Filter", &HVal, 255, NULL);
+while(1){
+    //change the brightness of the image
+//    cvAddS(img, cvScalar(bright-50,bright-50,bright-50), des);
+    modifiedImg=getFilteredImage(img,cvScalar(LHue, LSat, LVal),cvScalar(HHue, HSat, HVal));
+    cvShowImage("HSV Filter", modifiedImg);
+    c=cvWaitKey(100);
+    if(c==27){       
+        break;
+    }
+}
+cvDestroyWindow("HSV Filter");
+lowFilter=cvScalar(LHue, LSat, LVal);
+highFilter=cvScalar(HHue, HSat, HVal);
+}
+
+//This function apply a customize HSV filter
+IplImage *CTemplate::getFilteredImage(IplImage *original,CvScalar low, CvScalar high)
+{
+    IplImage* imgHSV = cvCreateImage(cvGetSize(original), 8, 3);
+    IplImage* imgFiltered = cvCreateImage(cvGetSize(original), 8, 3);
+    IplImage* imgThreshed = cvCreateImage(cvGetSize(original), 8, 1);
+
+    cvZero(imgFiltered);
+
+    cvCvtColor(original, imgHSV, CV_BGR2HSV);
+    cvInRangeS(imgHSV, low, high, imgThreshed);
+    cvOrS(original, CvScalar(),imgFiltered, imgThreshed);
+
+    cvReleaseImage(&imgHSV);
+    cvReleaseImage(&imgThreshed);
+    return imgFiltered;
+}
+
+//This function apply a HSV filter saved previously
 IplImage *CTemplate::getFilteredImage(IplImage *original)
+{
+    IplImage* imgHSV = cvCreateImage(cvGetSize(original), 8, 3);
+    IplImage* imgFiltered = cvCreateImage(cvGetSize(original), 8, 3);
+    IplImage* imgThreshed = cvCreateImage(cvGetSize(original), 8, 1);
+
+    cvZero(imgFiltered);
+
+    cvCvtColor(original, imgHSV, CV_BGR2HSV);
+    cvInRangeS(imgHSV, lowFilter, highFilter, imgThreshed);
+    cvOrS(original, CvScalar(),imgFiltered, imgThreshed);
+
+    cvReleaseImage(&imgHSV);
+    cvReleaseImage(&imgThreshed);
+    return imgFiltered;
+}
+
+
+//This function filter an image using skin filter(depending o the ligh and the skin
+IplImage *CTemplate::getFilteredImageSkin(IplImage *original)
 {
     IplImage* imgHSV = cvCreateImage(cvGetSize(original), 8, 3);
     IplImage* imgFiltered = cvCreateImage(cvGetSize(original), 8, 3);
