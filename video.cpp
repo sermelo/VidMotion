@@ -225,7 +225,7 @@ int main( int argc, char** argv )
     CvCapture* capture = 0;
 
     if( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
-        capture = cvCaptureFromCAM( argc == 2 ? argv[1][0] - '0' : 1 );
+        capture = cvCaptureFromCAM( argc == 2 ? argv[1][0] - '0' : 0 );
 
     if( !capture )
     {
