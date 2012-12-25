@@ -26,14 +26,17 @@ CTemplate::CTemplate(CvCapture* capture, bool colorFilter)
   checkROI=0;
   IplImage* temFrame=NULL;
   imgTemplate=NULL;
-  int c;
+  int c,aux;
   activeColorFilter=colorFilter;
   cvNamedWindow( "Camera", 1 );
   cvSetMouseCallback( "Camera", mouseHandler, NULL );
     for(;;)
     {
         temFrame = cvQueryFrame( capture );
-	if (checkROI==1){
+        if ((mouseUp.x==mouseDown.x || mouseUp.y==mouseDown.y) && checkROI==-1){
+        	checkROI=0;
+	}
+	else if (checkROI==1){
 	    cvRectangle(temFrame,
 		    cvPoint(mouseDown.x, mouseDown.y),
 		    cvPoint(mouseUp.x, mouseUp.y),
@@ -42,6 +45,19 @@ CTemplate::CTemplate(CvCapture* capture, bool colorFilter)
 	}
 	else if (checkROI==-1)
 	{
+          if (mouseUp.x<mouseDown.x)
+          {
+              aux=mouseUp.x;
+              mouseUp.x=mouseDown.x;
+              mouseDown.x=aux;
+          }
+          if (mouseUp.y<mouseDown.y)
+          {
+              aux=mouseUp.y;
+              mouseUp.y=mouseDown.y;
+              mouseDown.y=aux;
+          }
+          
 	  PRINT(mouseDown.x);
 	  PRINT(mouseDown.y);
 	  PRINT(mouseUp.x);
@@ -197,7 +213,6 @@ position CTemplate::getNewPosition(IplImage * frame)
    cvReleaseImage(&imgResult);
    return pos;
 }
-
 
 
 
