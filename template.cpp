@@ -21,7 +21,7 @@ position CTemplate::mouseDown;
 position CTemplate::mouseUp;
 int CTemplate::checkROI;
 
-CTemplate::CTemplate(CvCapture* capture )
+CTemplate::CTemplate(CvCapture* capture, bool colorFiler)
 {
   checkROI=0;
   IplImage* temFrame=NULL;
@@ -41,8 +41,10 @@ CTemplate::CTemplate(CvCapture* capture )
 	}
 	else if (checkROI==-1)
 	{
-	  fprintf(stdout, "Points: (%d, %d, %d, %d).\n",mouseDown.x, mouseDown.y,mouseUp.x, mouseUp.y);
-	  fprintf(stdout, "El tamaño es (%d, %d).\n",mouseDown.x-mouseUp.x, mouseDown.y- mouseUp.y);
+	  PRINT(mouseDown.x);
+	  PRINT(mouseDown.y);
+	  PRINT(mouseUp.x);
+	  PRINT(mouseUp.y);
 	  cvSetImageROI(temFrame, cvRect(mouseDown.x, mouseDown.y,mouseUp.x-mouseDown.x, mouseUp.y- mouseDown.y));
           imgTemplate = cvCreateImage(cvGetSize(temFrame), temFrame->depth, temFrame->nChannels);
           cvCopy(temFrame, imgTemplate, NULL);
@@ -60,10 +62,7 @@ CTemplate::CTemplate(CvCapture* capture )
     //Debug (Show template)
     CREATE_WINDOW("Template")
     PUBLISH_WINDOW("Template",imgTemplate)
-    
-   
     cvDestroyWindow("Camera");
-
 }
 
 CTemplate::~CTemplate()
@@ -137,9 +136,9 @@ void CTemplate::mouseHandler(int event, int x, int y, int flags, void *param)
 
 
 CvSize CTemplate::getSize(){
-  
   return cvGetSize(imgTemplate);
 }
+
 position CTemplate::getNewPosition(IplImage * frame)
 {
     IplImage* imgResult=NULL;
