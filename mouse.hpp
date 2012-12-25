@@ -21,7 +21,6 @@
 #include <X11/Xutil.h>
 #include <X11/Xlib.h>
 #include <assert.h>
-//#include <unistd.h>
 #include <malloc.h>
 
 struct coordinates {
