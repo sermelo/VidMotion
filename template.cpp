@@ -111,14 +111,16 @@ void CTemplate::mouseHandler(int event, int x, int y, int flags, void *param)
 	    mouseUp.x=x;
 	    mouseUp.y=y;
 	    checkROI=1;
-            fprintf(stdout, "Left button down (%d, %d).\n", x, y);
+	    PRINT(mouseDown.x);
+	    PRINT(mouseDown.y);
             break;
 
        case CV_EVENT_LBUTTONUP:
 	    mouseUp.x=x;
 	    mouseUp.y=y;
 	    checkROI=-1;
-            fprintf(stdout, "Left button up (%d, %d).\n", x, y);
+	    PRINT(mouseUp.x);
+	    PRINT(mouseUp.y);
             break;
 
 	    
