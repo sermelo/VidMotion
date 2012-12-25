@@ -1,7 +1,7 @@
 
 GCC=g++
-#CFLAGS=-Wall -c -DNDEBUG
-CFLAGS=-Wall -c
+CFLAGS=-Wall -c -DNDEBUG
+#CFLAGS=-Wall -c
 X11_FLAGS= -lX11
 OPENCV_FLAGS=`pkg-config --cflags opencv`
 OPENCV_LFLAGS=`pkg-config --libs opencv`
