@@ -20,7 +20,7 @@ X11
 make
 
 === Use ===
-Execute the "control"
+Execute the "control". It admit a parameter with the number of the video device. Default one is 0
 
 Step 1:
     Choose from the screen a region where the object to track is located.
