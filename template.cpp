@@ -24,7 +24,7 @@ int CTemplate::checkROI;
 CTemplate::CTemplate(CvCapture* capture )
 {
   checkROI=0;
-  IplImage* temFrame=0;
+  IplImage* temFrame=NULL;
   imgTemplate=NULL;
   int c;
   cvNamedWindow( "Object", 1 );
@@ -48,8 +48,6 @@ CTemplate::CTemplate(CvCapture* capture )
           imgTemplate = cvCreateImage(cvGetSize(temFrame), temFrame->depth, temFrame->nChannels);
           cvCopy(temFrame, imgTemplate, NULL);
           cvResetImageROI(temFrame);
-	  
-	  
 	  
 	  cvShowImage("Template", imgTemplate);
  
@@ -77,6 +75,7 @@ IplImage *CTemplate::getThreshold(IplImage *original)
     cvCvtColor(original, imgHSV, CV_BGR2HSV);
     IplImage* imgThreshed = cvCreateImage(cvGetSize(original), 8, 1);
     cvInRangeS(imgHSV, cvScalar(0,30,60), cvScalar(20, 150, 255), imgThreshed);
+    cvReleaseImage(&imgHSV);
     return imgThreshed;
 }
 
@@ -170,6 +169,7 @@ position CTemplate::getNewPosition(IplImage * frame)
      pos.x=-1;
      pos.y=-1;
    }
+   cvReleaseImage(&imgResult);
    return pos;
 }
 
