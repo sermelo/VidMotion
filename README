@@ -48,4 +48,5 @@ Add Click functionality
 Customize range in which to detect
 Select Rectangule template in any direction
 Adaptative template
+Add control to avoid false movements that one that are not fluid
 test fatchmach http://opencv.willowgarage.com/wiki/FastMatchTemplate
