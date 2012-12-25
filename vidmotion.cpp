@@ -46,7 +46,10 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
     coordinates pos,prevPos;
     position auxPos;
     CvSize resolution;
-
+    CvSize patternSize;
+    int c;
+    
+    patternSize=Pattern.getSize();
     pos.x=0;
     pos.y=0;
     auxPos.x=0;
@@ -54,7 +57,8 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
     prevPos.x=0;
     prevPos.y=0;
 
-    int c;
+    
+    
     IplImage* frame = 0;
     frame = cvQueryFrame( capture );
     if( !frame ){
@@ -74,7 +78,7 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
 	    prevPos.y = pos.y;
 	    pos.x=float(1)-float(auxPos.x)/resolution.width;
 	    pos.y=float(auxPos.y)/resolution.height;
-	    //cvRectangle(frame, cvPoint(auxPos.x-(imgTemplate->width/2), auxPos.y-(imgTemplate->height/2)), cvPoint(auxPos.x+(imgTemplate->width/2), auxPos.y+(imgTemplate->height/2)), cvScalar(0), 1);
+	    cvRectangle(frame, cvPoint(auxPos.x-(patternSize.width/2), auxPos.y-(patternSize.height/2)), cvPoint(auxPos.x+(patternSize.width/2), auxPos.y+(patternSize.height/2)), cvScalar(0), 1);
 	    cvCircle(frame, cvPoint(auxPos.x, auxPos.y),5, cvScalar(0), -1);
 
 	    //printf("Movemos a : %f,%f\n",auxPos.x,auxPos.y);
