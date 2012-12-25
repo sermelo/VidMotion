@@ -21,7 +21,55 @@ position CTemplate::mouseDown;
 position CTemplate::mouseUp;
 int CTemplate::checkROI;
 
+CTemplate::CTemplate(CvCapture* capture )
+{
+  checkROI=0;
+  IplImage* temFrame=0;
+  imgTemplate=NULL;
+  int c;
+  cvNamedWindow( "Object", 1 );
+  cvNamedWindow( "Template", 1 );
+  cvSetMouseCallback( "Object", mouseHandler, NULL );
+    for(;;)
+    {
+        temFrame = cvQueryFrame( capture );
+	if (checkROI==1){
+	    cvRectangle(temFrame,
+		    cvPoint(mouseDown.x, mouseDown.y),
+		    cvPoint(mouseUp.x, mouseUp.y),
+		    cvScalar(0, 0, 255, 0), 2, 8, 0);
+	    
+	}
+	else if (checkROI==-1)
+	{
+	  fprintf(stdout, "Points: (%d, %d, %d, %d).\n",mouseDown.x, mouseDown.y,mouseUp.x, mouseUp.y);
+	  fprintf(stdout, "El tamaño es (%d, %d).\n",mouseDown.x-mouseUp.x, mouseDown.y- mouseUp.y);
+	  cvSetImageROI(temFrame, cvRect(mouseDown.x, mouseDown.y,mouseUp.x-mouseDown.x, mouseUp.y- mouseDown.y));
+          imgTemplate = cvCreateImage(cvGetSize(temFrame), temFrame->depth, temFrame->nChannels);
+          cvCopy(temFrame, imgTemplate, NULL);
+          cvResetImageROI(temFrame);
+	  
+	  
+	  
+	  cvShowImage("Template", imgTemplate);
+ 
+	  break;
+	}
 
+	cvShowImage("Object", temFrame);
+	c = cvWaitKey(30);
+        if( (char) c == 27 )
+            break;
+    }
+    cvDestroyWindow("Template");
+    cvDestroyWindow("Object");
+
+}
+
+CTemplate::~CTemplate()
+{
+  cvReleaseImage(&imgTemplate);
+}
 
 IplImage *CTemplate::getThreshold(IplImage *original)
 {
@@ -82,50 +130,7 @@ void CTemplate::mouseHandler(int event, int x, int y, int flags, void *param)
     }
 }
 
-CTemplate::CTemplate(CvCapture* capture )
-{
-  checkROI=0;
-  IplImage* temFrame=0;
-  imgTemplate=NULL;
-  int c;
-  cvNamedWindow( "Object", 1 );
-  cvNamedWindow( "Template", 1 );
-  cvSetMouseCallback( "Object", mouseHandler, NULL );
-    for(;;)
-    {
-        temFrame = cvQueryFrame( capture );
-	if (checkROI==1){
-	    cvRectangle(temFrame,
-		    cvPoint(mouseDown.x, mouseDown.y),
-		    cvPoint(mouseUp.x, mouseUp.y),
-		    cvScalar(0, 0, 255, 0), 2, 8, 0);
-	    
-	}
-	else if (checkROI==-1)
-	{
-	  fprintf(stdout, "Points: (%d, %d, %d, %d).\n",mouseDown.x, mouseDown.y,mouseUp.x, mouseUp.y);
-	  fprintf(stdout, "El tamaño es (%d, %d).\n",mouseDown.x-mouseUp.x, mouseDown.y- mouseUp.y);
-	  cvSetImageROI(temFrame, cvRect(mouseDown.x, mouseDown.y,mouseUp.x-mouseDown.x, mouseUp.y- mouseDown.y));
-          imgTemplate = cvCreateImage(cvGetSize(temFrame), temFrame->depth, temFrame->nChannels);
-          cvCopy(temFrame, imgTemplate, NULL);
-          cvResetImageROI(temFrame);
-	  
-	  
-	  
-	  cvShowImage("Template", imgTemplate);
- 
-	  break;
-	}
 
-	cvShowImage("Object", temFrame);
-	c = cvWaitKey(30);
-        if( (char) c == 27 )
-            break;
-    }
-    cvDestroyWindow("Template");
-    cvDestroyWindow("Object");
-
-}
 
 CvSize CTemplate::getSize(){
   

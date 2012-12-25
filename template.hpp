@@ -54,6 +54,7 @@ class CTemplate{
       
    public:
       CTemplate(CvCapture* capture );
+      ~CTemplate();
       position getNewPosition(IplImage * frame);
       CvSize getSize();
 };
