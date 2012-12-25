@@ -45,6 +45,7 @@ VidMotion v0.0.1
 Allow user to change template
 Add optional color filter
 Test with blur template
+Test cropping the template using contour
 Add Click functionality
 Customize range in which to detect
 Select Rectangule template in any direction
