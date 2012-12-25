@@ -27,9 +27,8 @@ CTemplate::CTemplate(CvCapture* capture )
   IplImage* temFrame=NULL;
   imgTemplate=NULL;
   int c;
-  cvNamedWindow( "Object", 1 );
-  cvNamedWindow( "Template", 1 );
-  cvSetMouseCallback( "Object", mouseHandler, NULL );
+  cvNamedWindow( "Camera", 1 );
+  cvSetMouseCallback( "Camera", mouseHandler, NULL );
     for(;;)
     {
         temFrame = cvQueryFrame( capture );
@@ -49,23 +48,29 @@ CTemplate::CTemplate(CvCapture* capture )
           cvCopy(temFrame, imgTemplate, NULL);
           cvResetImageROI(temFrame);
 	  
-	  cvShowImage("Template", imgTemplate);
+	  
  
 	  break;
 	}
-
-	cvShowImage("Object", temFrame);
+	cvShowImage("Camera", temFrame);
 	c = cvWaitKey(30);
         if( (char) c == 27 )
             break;
     }
-    cvDestroyWindow("Template");
-    cvDestroyWindow("Object");
+    //Debug (Show template)
+    CREATE_WINDOW("Template")
+    PUBLISH_WINDOW("Template",imgTemplate)
+    
+   
+    cvDestroyWindow("Camera");
 
 }
 
 CTemplate::~CTemplate()
 {
+  //Debug close template window
+  CLOSE_WINDOW("Template")
+  
   cvReleaseImage(&imgTemplate);
 }
 

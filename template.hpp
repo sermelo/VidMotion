@@ -19,22 +19,25 @@
 
 #define CV_NO_BACKWARD_COMPATIBILITY
 
-
+//Defining debug functions
 #ifndef NDEBUG
 #define PRINT(x)
+#define CREATE_WINDOW(x)
+#define PUBLISH_WINDOW(x,y)
+#define CLOSE_WINDOW(x)
 #else
 #define PRINT(x) \
 std::cout << #x << ":\t" << x << std::endl;
+#define CREATE_WINDOW(x) \
+cvNamedWindow( x, 1 );
+#define PUBLISH_WINDOW(x,y) \
+cvShowImage(x, y);
+#define CLOSE_WINDOW(x) \
+cvDestroyWindow(x);
 #endif
 
 #include "cv.h"
 #include "highgui.h"
-#include <stdio.h>
-#include <ctype.h>
-
-#include <assert.h>
-#include <unistd.h>
-#include <malloc.h>
 
 struct position {
    int x;

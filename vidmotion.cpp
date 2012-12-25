@@ -17,22 +17,25 @@
 
 #define CV_NO_BACKWARD_COMPATIBILITY
 
-
 #ifndef NDEBUG
 #define PRINT(x)
+#define CREATE_WINDOW(x)
+#define PUBLISH_WINDOW(x,y)
+#define CLOSE_WINDOW(x)
 #else
 #define PRINT(x) \
 std::cout << #x << ":\t" << x << std::endl;
+#define CREATE_WINDOW(x) \
+cvNamedWindow( x, 1 );
+#define PUBLISH_WINDOW(x,y) \
+cvShowImage(x, y);
+#define CLOSE_WINDOW(x) \
+cvDestroyWindow(x);
 #endif
+
 
 #include "cv.h"
 #include "highgui.h"
-#include <stdio.h>
-#include <ctype.h>
-
-#include <assert.h>
-#include <unistd.h>
-#include <malloc.h>
 
 #include "mouse.hpp"
 #include "template.hpp"
@@ -40,9 +43,7 @@ std::cout << #x << ":\t" << x << std::endl;
 
 int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
 {
-
-    cvNamedWindow( "Tracking", 1 );
-
+    CREATE_WINDOW("Tracking");
     coordinates pos,prevPos;
     position auxPos;
     CvSize resolution;
@@ -87,9 +88,10 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
 	c = cvWaitKey(30);
         if( (char) c == 27 )
             break;
-	cvShowImage( "Tracking", frame );
+	PUBLISH_WINDOW("Tracking",frame);
     }
-    cvDestroyWindow("Tracking");
+    CLOSE_WINDOW("Tracking");
+    
     return 0;
 }
 
