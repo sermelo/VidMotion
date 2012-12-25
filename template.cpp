@@ -21,6 +21,7 @@ position CTemplate::mouseDown;
 position CTemplate::mouseUp;
 int CTemplate::checkROI;
 
+//Function to allow user to select a region to track later
 CTemplate::CTemplate(CvCapture* capture, bool colorFilter)
 {
   checkROI=0;
@@ -33,9 +34,11 @@ CTemplate::CTemplate(CvCapture* capture, bool colorFilter)
     for(;;)
     {
         temFrame = cvQueryFrame( capture );
+        //In case that selected region have 0 width or 0 height
         if ((mouseUp.x==mouseDown.x || mouseUp.y==mouseDown.y) && checkROI==-1){
         	checkROI=0;
 	}
+        //Case mouse still not button up
 	else if (checkROI==1){
 	    cvRectangle(temFrame,
 		    cvPoint(mouseDown.x, mouseDown.y),
@@ -43,6 +46,7 @@ CTemplate::CTemplate(CvCapture* capture, bool colorFilter)
 		    cvScalar(0, 0, 255, 0), 2, 8, 0);
 	    
 	}
+        //Case of finished to select a region
 	else if (checkROI==-1)
 	{
           if (mouseUp.x<mouseDown.x)
@@ -94,10 +98,11 @@ CTemplate::~CTemplate()
 {
   //Debug close template window
   CLOSE_WINDOW("Template")
-  
+
   cvReleaseImage(&imgTemplate);
 }
 
+//This funcion filter an image
 IplImage *CTemplate::getFilteredImage(IplImage *original)
 {
     IplImage* imgHSV = cvCreateImage(cvGetSize(original), 8, 3);
@@ -134,6 +139,7 @@ position CTemplate::getMoments(IplImage *img)
     return pos;
 }
 
+//Mouse callback
 void CTemplate::mouseHandler(int event, int x, int y, int flags, void *param)
 {
     switch(event) {
@@ -169,11 +175,12 @@ void CTemplate::mouseHandler(int event, int x, int y, int flags, void *param)
 }
 
 
-
+//Return template size
 CvSize CTemplate::getSize(){
   return cvGetSize(imgTemplate);
 }
 
+//Look for in the image the center of the region that fits best with the template
 position CTemplate::getNewPosition(IplImage * frame)
 {
     IplImage* imgResult=NULL;
