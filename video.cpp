@@ -142,22 +142,54 @@ IplImage *saveTemplate(CvCapture* capture )
     return imgTemplate;
 }
 
+coordinates getNewPosition(IplImage * frame, IplImage *imgTemplate)
+{
+    IplImage* imgResult=NULL;
+    double min_val=0, max_val=0;
+    CvPoint min_loc, max_loc;
+    CvSize resolution;
+    coordinates pos;
+    
+    	/*Color filter code
+	 IplImage* imgFiltered;
+         IplImage* imgThreshed;
+         imgFiltered = cvCreateImage(cvGetSize(frame), 8, 3);
+	  imgThreshed=getThreshold(frame);
+	 cvZero(imgFiltered);
+         cvOrS(frame, CvScalar(),imgFiltered, imgThreshed);
+         cvMatchTemplate(imgFiltered, imgTemplate, imgResult, CV_TM_CCORR_NORMED);*/
+	
+    resolution=cvGetSize(frame);
+    imgResult = cvCreateImage(cvSize(resolution.width-imgTemplate->width+1,resolution.height-imgTemplate->height+1), IPL_DEPTH_32F, 1);
+    cvZero(imgResult);
+    cvMatchTemplate(frame, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+    cvMinMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
+    //printf("%f\n", max_val);
+    if (max_val>=0.95)
+    {
+        pos.x=float(max_loc.x+(imgTemplate->width/2));
+	pos.y=float(max_loc.y+(imgTemplate->height/2));
+   }
+   else 
+   {
+     pos.x=-1;
+     pos.y=-1;
+   }
+   return pos;
+}
 int main_loop( CvCapture* capture, IplImage *imgTemplate )
 {
 
-    IplImage* imgResult= NULL;
-    /*IplImage* imgFiltered;
-    IplImage* imgThreshed;*/
-
     cvNamedWindow( "Tracking", 1 );
-
-    CvSize resolution;
     CCursor mouse;
 
-    coordinates pos,prevPos;
-    
+    coordinates pos,prevPos,auxPos;
+    CvSize resolution;
+
     pos.x=0;
     pos.y=0;
+    auxPos.x=0;
+    auxPos.y=0;
     prevPos.x=0;
     prevPos.y=0;
 
@@ -167,56 +199,34 @@ int main_loop( CvCapture* capture, IplImage *imgTemplate )
     if( !frame ){
        return -1;
     }
-    resolution=cvGetSize(frame);
-    if (!imgResult)
+    else
     {
-      //imgFiltered = cvCreateImage(cvGetSize(frame), 8, 3);
-      imgResult = cvCreateImage(cvSize(resolution.width-imgTemplate->width+1,resolution.height-imgTemplate->height+1), IPL_DEPTH_32F, 1);
-      cvZero(imgResult);
+      resolution=cvGetSize(frame);
     }
-    
-        
+  
     for(;;)
     {
-
         frame = cvQueryFrame( capture );
-	  
-	/*Color filter code
-	  imgThreshed=getThreshold(frame);
-	 cvZero(imgFiltered);
-         cvOrS(frame, CvScalar(),imgFiltered, imgThreshed);
-         cvMatchTemplate(imgFiltered, imgTemplate, imgResult, CV_TM_CCORR_NORMED);*/
-  
-        cvMatchTemplate(frame, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
-	
-	double min_val=0, max_val=0;
-        CvPoint min_loc, max_loc;
-        cvMinMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
-	//printf("%f\n", max_val);
-	if (max_val>=0.95)
-	{
-	    cvRectangle(frame, max_loc, cvPoint(max_loc.x+imgTemplate->width, max_loc.y+imgTemplate->height), cvScalar(0), 1);
-	    cvCircle(frame, cvPoint(max_loc.x+(imgTemplate->width/2), max_loc.y+(imgTemplate->height/2)),5, cvScalar(0), -1);
-
-        
-	
+        prevPos.x = pos.x;
+        prevPos.y = pos.y;
+        auxPos=getNewPosition(frame, imgTemplate);
+	if (auxPos.x!=-1){
 	    prevPos.x = pos.x;
 	    prevPos.y = pos.y;
-	    pos.x=float(1)-float(max_loc.x+(imgTemplate->width/2))/resolution.width;
-	    pos.y=float(max_loc.y+(imgTemplate->height/2))/resolution.height;
-	    //printf("Movemos a : %f,%f\n",pos.x,pos.y);
+	    pos.x=float(1)-float(auxPos.x)/resolution.width;
+	    pos.y=float(auxPos.y)/resolution.height;
+	    cvRectangle(frame, cvPoint(auxPos.x-(imgTemplate->width/2), auxPos.y-(imgTemplate->height/2)), cvPoint(auxPos.x+(imgTemplate->width/2), auxPos.y+(imgTemplate->height/2)), cvScalar(0), 1);
+	    cvCircle(frame, cvPoint(auxPos.x, auxPos.y),5, cvScalar(0), -1);
+
+	    //printf("Movemos a : %f,%f\n",auxPos.x,auxPos.y);
 	    mouse.setAbsPercentPosition(pos);
 	}
 	c = cvWaitKey(30);
         if( (char) c == 27 )
             break;
-	//cvShowImage( "ColorFilter", imgFiltered );
 	cvShowImage( "Tracking", frame );
-	
     }
-
     cvDestroyWindow("Tracking");
-
     return 0;
 }
 
