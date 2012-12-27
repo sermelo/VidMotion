@@ -95,12 +95,55 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
     return 0;
 }
 
+int getCamera(int argc, char** argv )
+{
+    if (argc==1)
+    {
+        return 0;
+    }
+    else if (argc==3)
+    {
+        if (strcmp(argv[1], "-c") == 0)
+        {
+            return atoi(argv[2]);
+        }
+    }
+    else if (argc==5)
+    {
+        if (strcmp(argv[1], "-c") == 0)
+        {
+            return atoi(argv[2]);
+        }
+        else if (strcmp(argv[3], "-c") == 0)
+        {
+            return atoi(argv[4]);
+        }
+    }
+    else
+    {
+        return -1;
+    }
+}
 int main( int argc, char** argv )
 {
+    int camera;
+    if (argc!=1 && argc!=3 && argc!=5)
+    {
+        fprintf(stderr,"Error in number of parameters");
+        return -1;
+    }
+    else
+    {
+       camera=getCamera(argc,argv);
+       if (camera==-1)
+       {
+           fprintf(stderr,"Error with camera parameter");
+       }
+    }
     CvCapture* capture = 0;
-
-    if( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
-        capture = cvCaptureFromCAM( argc == 2 ? argv[1][0] - '0' : 0 );
+    //if( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
+    //    capture = cvCaptureFromCAM( argc == 2 ? argv[1][0] - '0' : 0 );
+    capture = cvCaptureFromCAM(camera);
 
     if( !capture )
     {
@@ -110,7 +153,7 @@ int main( int argc, char** argv )
     //Init mouse object
     CCursor Mouse;
     //Init object patern
-    CTemplate Pattern(capture);
+    CTemplate Pattern(capture,true);
     //Start main loop
     main_loop(capture,Pattern,Mouse );
 
