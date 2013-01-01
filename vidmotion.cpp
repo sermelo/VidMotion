@@ -95,54 +95,45 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
     return 0;
 }
 
-int getCamera(int argc, char** argv )
+bool getFilterOption(int argc, char** argv )
 {
-    if (argc==1)
+    bool result=false;
+    for (int i=0;i<argc;i++)
     {
-        return 0;
-    }
-    else if (argc==3)
-    {
-        if (strcmp(argv[1], "-c") == 0)
+        if (strcmp(argv[i], "-f") == 0)
         {
-            return atoi(argv[2]);
+            result=true;
+            break;
         }
     }
-    else if (argc==5)
-    {
-        if (strcmp(argv[1], "-c") == 0)
-        {
-            return atoi(argv[2]);
-        }
-        else if (strcmp(argv[3], "-c") == 0)
-        {
-            return atoi(argv[4]);
-        }
-    }
-    else
-    {
-        return -1;
-    }
+    return result;
 }
+
+int getCameraDevice(int argc, char** argv )
+{
+    int result=0;
+    for (int i=0;i<argc;i++)
+    {
+        if (strcmp(argv[i], "-c") == 0)
+        {
+            result=atoi(argv[i+1]);
+            break;
+        }
+    }
+    return result;
+}
+
+
 int main( int argc, char** argv )
 {
     int camera;
-    if (argc!=1 && argc!=3 && argc!=5)
-    {
-        fprintf(stderr,"Error in number of parameters");
-        return -1;
-    }
-    else
-    {
-       camera=getCamera(argc,argv);
-       if (camera==-1)
-       {
-           fprintf(stderr,"Error with camera parameter");
-       }
-    }
+    bool filter;
+    
+    //Read optional parameters
+    filter=getFilterOption(argc,argv);
+    camera=getCameraDevice(argc,argv);
+    
     CvCapture* capture = 0;
-    //if( argc == 1 || (argc == 2 && strlen(argv[1]) == 1 && isdigit(argv[1][0])))
-    //    capture = cvCaptureFromCAM( argc == 2 ? argv[1][0] - '0' : 0 );
     capture = cvCaptureFromCAM(camera);
 
     if( !capture )
@@ -153,7 +144,7 @@ int main( int argc, char** argv )
     //Init mouse object
     CCursor Mouse;
     //Init object patern
-    CTemplate Pattern(capture,true);
+    CTemplate Pattern(capture,filter);
     //Start main loop
     main_loop(capture,Pattern,Mouse );
 
