@@ -1,5 +1,9 @@
+VidMotion v0.0.3
+25-12-2012
 VidMotion v0.0.2
 25-12-2012
+VidMotion v0.0.1
+24-12-2012
 
 === Copyright ===
 Author & copyright (c) 2012: Sergio Merino Alonso
@@ -10,7 +14,7 @@ GPLv3
 === Description  ===
 Ony tested in Linux
 Alternative way to move the mouse using a webcam, and an object to track
-This is a software under devlopment. So don't expect to replece your mouse 
+This is a software under devlopment. So don't expect to replace your mouse 
 with the program at the moment
 
 === Build Dependencies ===
@@ -21,20 +25,28 @@ X11
 make
 
 === Use ===
-Execute the "control". It admit a parameter with the number of the video device. 
-Default one is 0
+The executable: VidMotion
+Optional Parameters:  
+    -c x: x is the number of camera device. By default it is 0
+    -f: Apply customized HSV filter:
 
 Step 1:
     Choose from the screen a region where the object to track is located.
-    For now you can only choose the region from up left to down right
     For example: A hand
 
-Step 2: 
+Step 2:
+    Only if you use -f parameter, configure an HSV filter. Not always useful. To end this phase press esc
+
+Step 3: 
     Move the hand and you will see the mouse moving
     It's Important to keep the object in the same position and at the same distance
 
 
 === Changelog ===
+VidMotion v0.0.3
+        * The rectangule can be selected from down to up
+        * Customized color filter
+        * Added optional parameters
 VidMotion v0.0.2
         * Solved some memory leaks
 	* Reestructured all the code
@@ -43,12 +55,10 @@ VidMotion v0.0.1
 
 === TODO ===
 Allow user to change template
-Add optional color filter
 Test with blur template
 Test cropping the template using contour
 Add Click functionality
-Customize range in which to detect
-Select Rectangule template in any direction
-Adaptative template
+Customize range(width height) in which to detect
+Adaptative template with, perhaps adaptative color range?
 Add control to avoid false movements that one that are not fluid
 test fatchmach http://opencv.willowgarage.com/wiki/FastMatchTemplate
