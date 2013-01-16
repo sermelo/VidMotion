@@ -204,6 +204,10 @@ CvRect chooseRegion(CvCapture* capture, CTemplate Pattern)
 	    cvRectangle(frame, cvPoint(auxPos.x-(patternSize.width/2), auxPos.y-(patternSize.height/2)), cvPoint(auxPos.x+(patternSize.width/2), auxPos.y+(patternSize.height/2)), cvScalar(0), 1);
 	    cvCircle(frame, cvPoint(auxPos.x, auxPos.y),5, cvScalar(0), -1);
 	}
+	if (points==1)
+	{
+	   cvRectangle(frame, cvPoint(region.x, region.y), cvPoint(pos.x, pos.y),cvScalar(0, 0, 255, 0), 2, 8, 0);
+	}
 	cvShowImage("Region", frame);
 	c = cvWaitKey(30);
         if( (char) c == 27 )
