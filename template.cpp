@@ -93,8 +93,7 @@ CTemplate::~CTemplate()
 {
   //Debug close template window
   CLOSE_WINDOW("Template")
-
-  cvReleaseImage(&imgTemplate);
+  //cvReleaseImage(&imgTemplate);
 }
 
 //Create a customize HSV filter
@@ -275,7 +274,7 @@ position CTemplate::getNewPosition(IplImage * frame)
     cvMinMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
     PRINT(max_val);
     //printf("%f\n", max_val);
-    if ((max_val>=0.95 && !activeColorFilter) || (max_val>=0.40 && activeColorFilter))
+    if ((max_val>=0.9 && !activeColorFilter) || (max_val>=0.40 && activeColorFilter))
     {
         pos.x=float(max_loc.x+(imgTemplate->width/2));
 	pos.y=float(max_loc.y+(imgTemplate->height/2));
