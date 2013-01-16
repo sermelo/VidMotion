@@ -79,12 +79,17 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse, CvRect regi
 	if (auxPos.x!=-1){
 	    prevPos.x = pos.x;
 	    prevPos.y = pos.y;
-	    pos.x=float(1)-float(auxPos.x)/resolution.width;
-	    pos.y=float(auxPos.y)/resolution.height;
+	    //pos.x=float(1)-float(auxPos.x)/resolution.width;
+	    //pos.y=float(auxPos.y)/resolution.height;
+	    pos.x=float(1)-((float(auxPos.x)-region.x)/region.width);
+	    pos.y=(float(auxPos.y)-region.y)/region.height;
+	    
 	    cvRectangle(frame, cvPoint(auxPos.x-(patternSize.width/2), auxPos.y-(patternSize.height/2)), cvPoint(auxPos.x+(patternSize.width/2), auxPos.y+(patternSize.height/2)), cvScalar(0), 1);
 	    cvCircle(frame, cvPoint(auxPos.x, auxPos.y),5, cvScalar(0), -1);
 
 	    //printf("Movemos a : %f,%f\n",auxPos.x,auxPos.y);
+	    PRINT(pos.x);
+	    PRINT(pos.y);
 	    Mouse.setAbsPercentPosition(pos);
 	}
 	c = cvWaitKey(30);
@@ -153,10 +158,8 @@ CvRect autoRegion(CvCapture* capture, CTemplate Pattern)
       resolution=cvGetSize(frame);
     }
     CvRect region=cvRect(0, 0, 0, 0);
-    region.x=patternSize.width/2;
-    region.y=patternSize.height/2;
-    region.width=resolution.width-patternSize.width/2;
-    region.height=resolution.height-patternSize.height/2;
+    region.width=resolution.width;
+    region.height=resolution.height;
     return region;
 }
 
