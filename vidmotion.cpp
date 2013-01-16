@@ -18,11 +18,14 @@
 #define CV_NO_BACKWARD_COMPATIBILITY
 
 #ifndef NDEBUG
+#define ADDRECT(x,y,z)
 #define PRINT(x)
 #define CREATE_WINDOW(x)
 #define PUBLISH_WINDOW(x,y)
 #define CLOSE_WINDOW(x)
 #else
+#define ADDRECT(x,y,z) \
+cvRectangle(x, y, z,cvScalar(0, 0, 255, 0), 2, 8, 0);
 #define PRINT(x) \
 std::cout << #x << ":\t" << x << std::endl;
 #define CREATE_WINDOW(x) \
@@ -93,6 +96,7 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse, CvRect regi
 	c = cvWaitKey(30);
         if( (char) c == 27 )
             break;
+	ADDRECT(frame,cvPoint(region.x, region.y), cvPoint(region.x+region.width, region.y+region.height));
 	PUBLISH_WINDOW("Tracking",frame);
     }
     CLOSE_WINDOW("Tracking");
