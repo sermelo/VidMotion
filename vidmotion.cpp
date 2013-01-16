@@ -210,7 +210,8 @@ CvRect chooseRegion(CvCapture* capture, CTemplate Pattern)
 	}
 	cvShowImage("Region", frame);
 	c = cvWaitKey(30);
-        if( (char) c == 27 )
+	//fprintf(stderr,"key captured: %d\n",(char) c);
+        if( (char) c == 10 )
 	{
 	    if (points==0)
 	    {
