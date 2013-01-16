@@ -74,14 +74,8 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse, CvRect regi
     for(;;)
     {
         frame = cvQueryFrame( capture );
-	if (region.width!=0 && region.height!=0)
-	{
-            auxPos=Pattern.getNewPosition(frame, region);
-	}
-	else
-	{
-	    auxPos=Pattern.getNewPosition(frame);
-	}
+        auxPos=Pattern.getNewPosition(frame, region);
+
 	if (auxPos.x!=-1){
 	    prevPos.x = pos.x;
 	    prevPos.y = pos.y;
@@ -143,6 +137,27 @@ int getRegionOption(int argc, char** argv )
         }
     }
     return result;
+}
+
+CvRect autoRegion(CvCapture* capture, CTemplate Pattern)
+{
+    IplImage* frame = 0;
+    CvSize resolution, patternSize;
+    patternSize=Pattern.getSize();
+    frame = cvQueryFrame( capture );
+    if( !frame ){
+       exit(-1);
+    }
+    else
+    {
+      resolution=cvGetSize(frame);
+    }
+    CvRect region=cvRect(0, 0, 0, 0);
+    region.x=patternSize.width/2;
+    region.y=patternSize.height/2;
+    region.width=resolution.width-patternSize.width/2;
+    region.height=resolution.height-patternSize.height/2;
+    return region;
 }
 
 CvRect chooseRegion(CvCapture* capture, CTemplate Pattern)
@@ -262,6 +277,10 @@ int main( int argc, char** argv )
     if (reg)
     {
         region=chooseRegion(capture,Pattern);
+    }
+    else
+    {
+        region=autoRegion(capture,Pattern);
     }
     //Start main loop
     main_loop(capture,Pattern,Mouse,region);
