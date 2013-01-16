@@ -74,7 +74,14 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse, CvRect regi
     for(;;)
     {
         frame = cvQueryFrame( capture );
-        auxPos=Pattern.getNewPosition(frame, region);
+	if (region.width!=0 && region.height!=0)
+	{
+            auxPos=Pattern.getNewPosition(frame, region);
+	}
+	else
+	{
+	    auxPos=Pattern.getNewPosition(frame);
+	}
 	if (auxPos.x!=-1){
 	    prevPos.x = pos.x;
 	    prevPos.y = pos.y;
@@ -118,6 +125,20 @@ int getCameraDevice(int argc, char** argv )
         if (strcmp(argv[i], "-c") == 0)
         {
             result=atoi(argv[i+1]);
+            break;
+        }
+    }
+    return result;
+}
+
+int getRegionOption(int argc, char** argv )
+{
+    int result=false;
+    for (int i=0;i<argc;i++)
+    {
+        if (strcmp(argv[i], "-R") == 0)
+        {
+            result=true;
             break;
         }
     }
@@ -198,6 +219,10 @@ CvRect chooseRegion(CvCapture* capture, CTemplate Pattern)
 		{
 		       region.height=pos.y-region.y;
 		}
+		region.x=region.x-patternSize.width/2;
+		region.y=region.y-patternSize.height/2;
+		region.width=region.width+patternSize.width;
+		region.height=region.height+patternSize.height;
 		PRINT(region.x);
 		PRINT(region.y);
 		PRINT(region.width);
@@ -214,10 +239,12 @@ int main( int argc, char** argv )
 {
     int camera;
     bool filter;
-    CvRect region;
+    bool reg;
+    CvRect region=cvRect(0, 0, 0, 0);
     //Read optional parameters
     filter=getFilterOption(argc,argv);
     camera=getCameraDevice(argc,argv);
+    reg=getRegionOption(argc,argv);
     
     CvCapture* capture = 0;
     capture = cvCaptureFromCAM(camera);
@@ -232,9 +259,12 @@ int main( int argc, char** argv )
     //Init object patern
     CTemplate Pattern(capture,filter);
     //Select region to explore
-    region=chooseRegion(capture,Pattern);
+    if (reg)
+    {
+        region=chooseRegion(capture,Pattern);
+    }
     //Start main loop
-    main_loop(capture,Pattern,Mouse, region );
+    main_loop(capture,Pattern,Mouse,region);
 
     //cvReleaseCapture( &capture );
     return 0;
