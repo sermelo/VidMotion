@@ -42,7 +42,7 @@ cvDestroyWindow(x);
 
 
 
-int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
+int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse, CvRect region )
 {
     CREATE_WINDOW("Tracking");
     coordinates pos,prevPos;
@@ -74,7 +74,7 @@ int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
     for(;;)
     {
         frame = cvQueryFrame( capture );
-        auxPos=Pattern.getNewPosition(frame);
+        auxPos=Pattern.getNewPosition(frame, region);
 	if (auxPos.x!=-1){
 	    prevPos.x = pos.x;
 	    prevPos.y = pos.y;
@@ -214,7 +214,7 @@ int main( int argc, char** argv )
 {
     int camera;
     bool filter;
-    
+    CvRect region;
     //Read optional parameters
     filter=getFilterOption(argc,argv);
     camera=getCameraDevice(argc,argv);
@@ -232,9 +232,9 @@ int main( int argc, char** argv )
     //Init object patern
     CTemplate Pattern(capture,filter);
     //Select region to explore
-    chooseRegion(capture,Pattern);
+    region=chooseRegion(capture,Pattern);
     //Start main loop
-    main_loop(capture,Pattern,Mouse );
+    main_loop(capture,Pattern,Mouse, region );
 
     //cvReleaseCapture( &capture );
     return 0;

@@ -290,3 +290,54 @@ position CTemplate::getNewPosition(IplImage * frame)
 
 
 
+//Look for in the image the center of the region that fits best with the template. It will look for in only in a region
+position CTemplate::getNewPosition(IplImage * frame, CvRect region)
+{
+    IplImage* imgResult=NULL;
+    double min_val=0, max_val=0;
+    CvPoint min_loc, max_loc;
+    CvSize resolution;
+    position pos;
+    IplImage* imgRegion;
+    
+    
+    resolution=cvGetSize(frame);
+
+    imgResult = cvCreateImage(cvSize(region.width-imgTemplate->width+1,region.height-imgTemplate->height+1), IPL_DEPTH_32F, 1);
+    cvZero(imgResult);
+    
+    cvSetImageROI(frame, region);
+    imgRegion = cvCreateImage(cvGetSize(frame), frame->depth, frame->nChannels);
+    cvCopy(frame, imgRegion, NULL);
+    cvResetImageROI(frame);
+
+	  
+    //Color filter code
+    if (activeColorFilter)
+    {
+	IplImage* imgFiltered;
+        imgFiltered = getFilteredImage(imgRegion);
+        cvMatchTemplate(imgFiltered, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+        cvReleaseImage(&imgFiltered);
+    }
+    else{	
+        cvMatchTemplate(imgRegion, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+    }
+    cvMinMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
+    PRINT(max_val);
+    //printf("%f\n", max_val);
+    if ((max_val>=0.9 && !activeColorFilter) || (max_val>=0.40 && activeColorFilter))
+    {
+        pos.x=float(max_loc.x+(imgTemplate->width/2)+region.x);
+	pos.y=float(max_loc.y+(imgTemplate->height/2)+region.y);
+   }
+   else 
+   {
+     pos.x=-1;
+     pos.y=-1;
+   }
+   cvReleaseImage(&imgResult);
+   return pos;
+}
+
+

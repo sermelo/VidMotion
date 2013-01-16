@@ -64,6 +64,7 @@ class CTemplate{
       CTemplate(CvCapture* capture,bool colorFilter=false );
       ~CTemplate();
       position getNewPosition(IplImage * frame);
+      position getNewPosition(IplImage * frame, CvRect region);
       CvSize getSize();
 };
 #endif
