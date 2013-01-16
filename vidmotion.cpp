@@ -41,6 +41,7 @@ cvDestroyWindow(x);
 #include "template.hpp"
 
 
+
 int main_loop( CvCapture* capture, CTemplate Pattern, CCursor Mouse )
 {
     CREATE_WINDOW("Tracking");
@@ -123,6 +124,91 @@ int getCameraDevice(int argc, char** argv )
     return result;
 }
 
+CvRect chooseRegion(CvCapture* capture, CTemplate Pattern)
+{
+    int points=0;
+    CvRect region=cvRect(0, 0, 0, 0);
+    cvNamedWindow( "Region", 1 );
+    position pos,prevPos;
+    position auxPos;
+    CvSize resolution;
+    CvSize patternSize;
+    int c;
+    
+    patternSize=Pattern.getSize();
+    pos.x=0;
+    pos.y=0;
+    auxPos.x=0;
+    auxPos.y=0;
+    prevPos.x=0;
+    prevPos.y=0;
+
+    
+    
+    IplImage* frame = 0;
+    frame = cvQueryFrame( capture );
+    if( !frame ){
+       return region;
+    }
+    else
+    {
+      resolution=cvGetSize(frame);
+    }
+
+    for(;;)
+    {
+        frame = cvQueryFrame( capture );
+        auxPos=Pattern.getNewPosition(frame);
+	if (auxPos.x!=-1){
+	    prevPos.x = pos.x;
+	    prevPos.y = pos.y;
+	    pos.x=auxPos.x;
+	    pos.y=auxPos.y;
+	    cvRectangle(frame, cvPoint(auxPos.x-(patternSize.width/2), auxPos.y-(patternSize.height/2)), cvPoint(auxPos.x+(patternSize.width/2), auxPos.y+(patternSize.height/2)), cvScalar(0), 1);
+	    cvCircle(frame, cvPoint(auxPos.x, auxPos.y),5, cvScalar(0), -1);
+	}
+	cvShowImage("Region", frame);
+	c = cvWaitKey(30);
+        if( (char) c == 27 )
+	{
+	    if (points==0)
+	    {
+	        region.x=pos.x;
+	        region.y=pos.y;
+		points=1;
+		
+	    }
+	    else
+	    {
+	        if (pos.x<region.x)
+		{
+		       region.width=region.x-pos.x;
+		       region.x=pos.x;
+		}
+		else
+		{
+		       region.width=pos.x-region.x;
+		}
+		if (pos.y<region.y)
+		{
+		       region.height=region.y-pos.y;
+		       region.y=pos.y;
+		}
+		else
+		{
+		       region.height=pos.y-region.y;
+		}
+		PRINT(region.x);
+		PRINT(region.y);
+		PRINT(region.width);
+		PRINT(region.height)
+                break;
+	    }
+        }
+    }
+    cvDestroyWindow("Region");
+    return region;
+}
 
 int main( int argc, char** argv )
 {
@@ -145,9 +231,11 @@ int main( int argc, char** argv )
     CCursor Mouse;
     //Init object patern
     CTemplate Pattern(capture,filter);
+    //Select region to explore
+    chooseRegion(capture,Pattern);
     //Start main loop
     main_loop(capture,Pattern,Mouse );
 
-    cvReleaseCapture( &capture );
+    //cvReleaseCapture( &capture );
     return 0;
 }
