@@ -39,6 +39,8 @@ cvDestroyWindow(x);
 #include "cv.h"
 #include "highgui.h"
 
+using namespace cv;
+
 struct position {
    int x;
    int y;
@@ -65,6 +67,7 @@ class CTemplate{
       ~CTemplate();
       position getNewPosition(IplImage * frame);
       position getNewPosition(IplImage * frame, CvRect region);
+      position getNewPositionSurf(Mat img_1, Mat img_2);
       CvSize getSize();
 };
 #endif
