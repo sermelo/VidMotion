@@ -38,15 +38,12 @@ destroyWindow(x);
 
 #include "cv.h"
 #include "highgui.h"
+#include "tracker.hpp"
 
 using namespace cv;
 
-struct position {
-   int x;
-   int y;
-};
 
-class CTemplate{
+class CTemplate : public CTracker{
    private:
       static position mouseDown;
       static position mouseUp;
