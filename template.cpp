@@ -80,7 +80,7 @@ CTemplate::CTemplate(VideoCapture capture, bool colorFilter)
 	  break;
 	}
 	imshow("Camera", temFrame);
-	c = cvWaitKey(30);
+	c = waitKey(30);
         if( (char) c == 27 )
             break;
     }
@@ -120,7 +120,7 @@ void CTemplate::createHSVFilter(Mat img)
 
       modifiedImg=getFilteredImage(img,Scalar(LHue, LSat, LVal),Scalar(HHue, HSat, HVal));
       imshow("HSV Filter", modifiedImg);
-      c=cvWaitKey(100);
+      c=waitKey(100);
       if((char) c==10){      
 	  break;
       }

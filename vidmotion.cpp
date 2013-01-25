@@ -84,7 +84,7 @@ int main_loop(VideoCapture capture, CTemplate Pattern, CCursor Mouse, Rect regio
 	}
 	ADDRECT(frame,cvPoint(region.x, region.y), cvPoint(region.x+region.width, region.y+region.height));
 	PUBLISH_WINDOW("Camera",frame);
-	c = cvWaitKey(30);
+	c = waitKey(30);
         if( (char) c == 27 )
             break;
     }
@@ -146,7 +146,7 @@ Rect chooseRegion(VideoCapture capture, CTemplate Pattern)
 	   rectangle(frame, Point(region.x, region.y), Point(pos.x, pos.y),Scalar(0, 0, 255, 0), 2, 8, 0);
 	}
 	imshow("Region", frame);
-	c = cvWaitKey(30);
+	c = waitKey(30);
         if( (char) c == 10 )
 	{
 	    if (points==0)
