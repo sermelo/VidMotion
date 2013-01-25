@@ -1,3 +1,5 @@
+VidMotion v0.0.5
+25-01-2013
 VidMotion v0.0.4
 13-01-2013
 VidMotion v0.0.3
@@ -6,10 +8,10 @@ VidMotion v0.0.2
 25-12-2012
 VidMotion v0.0.1
 24-12-2012
-
-=== Copyright ===
-Author & copyright (c) 2012-2013: Sergio Merino Alonso
-
+                                                                                                                                                                                                
+=== Copyright ===                                                                                                                                                                               
+Author & copyright (c) 2012-2013: Sergio Merino Alonso                                                                                                                                          
+                                                                                                                                                                                                
 === License ===
 GPLv3
 
@@ -27,18 +29,23 @@ X11
 make
 
 === Use ===
+Algorithms:
+   PatternMatch: Very Quick, Can confuse with the background, can handle rotations
+   Surf: It is slower, don't work fine with moving images, it can handle rotations
+
 The executable: VidMotion
 Optional Parameters:  
     -c x: x is the number of camera device. By default it is 0
-    -f: Apply customized HSV filter:
+    -f: Apply customized HSV filter
     -R: Select a region in which the pattern will be searched
+    -S: Use surf algorithm
 
 Step 1:
     Choose from the screen a region where the object to track is located.
     For example: A hand
 
 Step 2:
-    Only if you use -f parameter. Configure an HSV filter. Not always useful. To end this phase press esc.
+    Only if you use -f parameter and not -S. Configure an HSV filter. Not always useful. To end this phase press enter.
 
 Step 3:
     Only if you use -R parameter. To select region place the object at one corner(up-left for example) and place enter.
@@ -51,6 +58,12 @@ Step 4:
 
 
 === Changelog ===
+VidMotion v0.0.5
+        * Press enter to finish HSV filter
+        * Added Surf algorithm
+        * Changed all IpImage to Mat
+        * Changed C functions by C++ functions
+
 VidMotion v0.0.4
         * Added region functionality
 
@@ -60,14 +73,17 @@ VidMotion v0.0.3
         * Added optional parameters
 VidMotion v0.0.2
         * Solved some memory leaks
-	* Reestructured all the code
+        * Reestructured all the code
 VidMotion v0.0.1
-	* First release
+        * First release
 
 === TODO ===
 Allow user to change template
+Test Surf Algorithm(add HSV filter?)
+Solve segmentation fault when program ends
+Allow the two enters of the keyboard
 Test with blur template
-Test cropping the template using contour
+Test autocropping the template using contour
 Add Click functionality
 Adaptative template with, perhaps adaptative color range?
 Add control to avoid false movements that one that are not fluid
