@@ -25,7 +25,7 @@
 #define CLOSE_WINDOW(x)
 #else
 #define ADDRECT(x,y,z) \
-rectangle(x, y, z,cvScalar(0, 0, 255, 0), 2, 8, 0);
+rectangle(x, y, z,Scalar(0, 0, 255, 0), 2, 8, 0);
 #define PRINT(x) \
 std::cout << #x << ":\t" << x << std::endl;
 #define CREATE_WINDOW(x) \
@@ -76,7 +76,7 @@ int main_loop(VideoCapture capture, CTemplate Pattern, CCursor Mouse, Rect regio
 	    pos.x=float(1)-((float(auxPos.x)-region.x-(patternSize.width/2))/(region.width-(patternSize.width)));
 	    pos.y=(float(auxPos.y)-region.y-(patternSize.height/2))/(region.height-(patternSize.height));
 	    
-	    rectangle(frame, Point(auxPos.x-(patternSize.width/2), auxPos.y-(patternSize.height/2)), Point(auxPos.x+(patternSize.width/2), auxPos.y+(patternSize.height/2)), cvScalar(0), 1);
+	    rectangle(frame, Point(auxPos.x-(patternSize.width/2), auxPos.y-(patternSize.height/2)), Point(auxPos.x+(patternSize.width/2), auxPos.y+(patternSize.height/2)), Scalar(0), 1);
 	    circle(frame, Point(auxPos.x, auxPos.y),5, Scalar(0), -1);
 	    PRINT(pos.x);
 	    PRINT(pos.y);
