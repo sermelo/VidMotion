@@ -29,7 +29,7 @@ CTemplate::CTemplate(VideoCapture capture, bool colorFilter)
   int c,aux;
   activeColorFilter=colorFilter;
   namedWindow( "Camera", 1 );
-  cvSetMouseCallback( "Camera", mouseHandler, NULL );
+  setMouseCallback( "Camera", mouseHandler, NULL );
     for(;;)
     {
         capture >> temFrame; // get a new frame from camera
