@@ -42,10 +42,11 @@ destroyWindow(x);
 
 #include "mouse.hpp"
 #include "template.hpp"
+#include "surfTemplate.hpp"
 
 
 
-int main_loop(VideoCapture capture, CTemplate Pattern, CCursor Mouse, Rect region )
+int main_loop(VideoCapture capture, CTracker * Pattern, CCursor Mouse, Rect region )
 {
     Mat frame;
     coordinates pos,prevPos;
@@ -54,7 +55,7 @@ int main_loop(VideoCapture capture, CTemplate Pattern, CCursor Mouse, Rect regio
     Size patternSize;
     int c;
     
-    patternSize=Pattern.getSize();
+    patternSize=Pattern->getSize();
     pos.x=0;
     pos.y=0;
     auxPos.x=0;
@@ -68,7 +69,7 @@ int main_loop(VideoCapture capture, CTemplate Pattern, CCursor Mouse, Rect regio
     for(;;)
     {
         capture >> frame;
-        auxPos=Pattern.getNewPosition(frame, region);
+        auxPos=Pattern->getNewPosition(frame, region);
 
 	if (auxPos.x!=-1){
 	    prevPos.x = pos.x;
@@ -94,12 +95,12 @@ int main_loop(VideoCapture capture, CTemplate Pattern, CCursor Mouse, Rect regio
 
 
 
-Rect autoRegion(VideoCapture capture, CTemplate Pattern)
+Rect autoRegion(VideoCapture capture, CTracker * Pattern)//CTemplate Pattern)//CTracker Pattern)
 {
     Mat frame;
     Size resolution, patternSize;
     Rect region(0, 0, 0, 0);
-    patternSize=Pattern.getSize();
+    patternSize=Pattern->getSize();
     capture >> frame;
     resolution=Size(frame.cols,frame.rows);
     region.width=resolution.width;
@@ -107,7 +108,7 @@ Rect autoRegion(VideoCapture capture, CTemplate Pattern)
     return region;
 }
 
-Rect chooseRegion(VideoCapture capture, CTemplate Pattern)
+Rect chooseRegion(VideoCapture capture, CTracker * Pattern)
 {
     Mat frame;
     int points=0,c;
@@ -116,7 +117,7 @@ Rect chooseRegion(VideoCapture capture, CTemplate Pattern)
     position auxPos;
     Size resolution, patternSize;
     
-    patternSize=Pattern.getSize();
+    patternSize=Pattern->getSize();
     pos.x=0;
     pos.y=0;
     auxPos.x=0;
@@ -132,7 +133,7 @@ Rect chooseRegion(VideoCapture capture, CTemplate Pattern)
     for(;;)
     {
         capture >> frame;
-        auxPos=Pattern.getNewPosition(frame);
+        auxPos=Pattern->getNewPosition(frame);
 	if (auxPos.x!=-1){
 	    prevPos.x = pos.x;
 	    prevPos.y = pos.y;
@@ -255,7 +256,8 @@ int main( int argc, char** argv )
     //Init mouse object
     CCursor Mouse;
     //Init object patern
-    CTemplate Pattern(cap,filter);
+//    CTemplate Pattern(cap,filter);
+    CTracker * Pattern=new CTemplate(cap,filter);//=new CsurfTemplate(cap,filter);
     //Select region to explore
     if (reg)
     {
