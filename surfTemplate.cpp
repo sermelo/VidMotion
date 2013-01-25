@@ -14,23 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with VidMotion.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "tracker.hpp"
-
-class CsurfTemplate : public CTracker{
-   private:
-      static position mouseDown;
-      static position mouseUp;
-      static int checkROI;
-      Mat imgTemplate;
-      static void mouseHandler(int event, int x, int y, int flags, void *param);
-   public:
-      CsurfTemplate(VideoCapture capture,bool colorFilter=false );
-      ~CsurfTemplate();
-      position getNewPosition(Mat frame);
-      position getNewPosition(Mat frame, Rect region);
-      Size getSize();
-};
-
+#include "surfTemplate.hpp"
 
 position CsurfTemplate::mouseDown;
 position CsurfTemplate::mouseUp;
