@@ -69,6 +69,7 @@ CsurfTemplate::CsurfTemplate(VideoCapture capture, bool colorFilter)
 	  Rect myROI(mouseDown.x, mouseDown.y, mouseUp.x-mouseDown.x, mouseUp.y-mouseDown.y);
 	  tmpROI=temFrame(myROI);
 	  tmpROI.copyTo(imgTemplate);
+	  templateSurf=createSurfData(imgTemplate);
 	  break;
 	}
 	imshow("Camera", temFrame);
@@ -86,6 +87,22 @@ CsurfTemplate::~CsurfTemplate()
 
 }
 
+//Create surf points
+surfData CsurfTemplate::createSurfData(Mat image)
+{
+  int minHessian = 400;
+  surfData result;
+  Mat descriptors;
+  vector<KeyPoint> imgPoints;
+  SurfFeatureDetector surf( minHessian );
+  SurfDescriptorExtractor extractor;
+  
+  surf.detect( image, imgPoints );
+  extractor.compute(image,imgPoints,descriptors);
+  result.keypoints=imgPoints;
+  result.descriptors=descriptors;
+  return result;
+}
 
 //Mouse callback
 void CsurfTemplate::mouseHandler(int event, int x, int y, int flags, void *param)
@@ -131,156 +148,85 @@ Size CsurfTemplate::getSize(){
 //Look for in the image the center of the region that fits best with the template
 position CsurfTemplate::getNewPosition(Mat frame)
 {
-    Mat imgResult, imgFiltered;
-    double min_val=0, max_val=0;
-    Point min_loc, max_loc;
-    Size resolution;
     position pos;
-    resolution=Size(frame.cols,frame.rows);
-    //Color filter code
-	
-        matchTemplate(frame, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
+    surfData frameData;
+    frameData=createSurfData(frame);
+    FlannBasedMatcher matcher;
 
-    PUBLISH_WINDOW( "Result", imgResult);
-    minMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
-    PRINT(max_val);
-    if ((max_val>=0.9))
-    {
-        pos.x=float(max_loc.x+(imgTemplate.cols/2));
-	pos.y=float(max_loc.y+(imgTemplate.rows/2));
-   }
-   else 
-   {
-     pos.x=-1;
-     pos.y=-1;
-   }
-   PRINT(pos.x);
-   PRINT(pos.y);
-   return pos;
+    vector< DMatch > matches;
+    matcher.match( templateSurf.descriptors, frameData.descriptors, matches );
+
+    double max_dist = 0; double min_dist = 100;
+
+  for( int i = 0; i < templateSurf.descriptors.rows; i++ )
+  { double dist = matches[i].distance;
+    if( dist < min_dist ) min_dist = dist;
+    if( dist > max_dist ) max_dist = dist;
+  }
+  std::vector< DMatch > good_matches;
+
+  for( int i = 0; i < templateSurf.descriptors.rows; i++ )
+  { 
+
+    if( matches[i].distance < 3*min_dist )
+    { 
+      good_matches.push_back( matches[i]); 
+    }
+  }
+
+  Mat img_matches;
+  /*drawMatches( imgTemplate, templateSurf.keypoints, frame, frameData.keypoints,
+               good_matches, img_matches, Scalar::all(-1), Scalar::all(-1),
+               vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+*/
+
+  std::vector<Point2f> obj;
+  std::vector<Point2f> scene;
+
+  for( int i = 0; i < good_matches.size(); i++ )
+  {
+    obj.push_back( templateSurf.keypoints[ good_matches[i].queryIdx ].pt );
+    scene.push_back( frameData.keypoints[ good_matches[i].trainIdx ].pt );
+  }
+  if (good_matches.size()>=4)
+  {
+    Mat H = findHomography( obj, scene, CV_RANSAC );
+
+
+    std::vector<Point2f> obj_corners(4);
+    obj_corners[0] = cvPoint(0,0); obj_corners[1] = cvPoint( imgTemplate.cols, 0 );
+    obj_corners[2] = cvPoint( imgTemplate.cols, imgTemplate.rows ); obj_corners[3] = cvPoint( 0, imgTemplate.rows );
+    std::vector<Point2f> scene_corners(4);
+
+    perspectiveTransform( obj_corners, scene_corners, H);
+
+    pos.x=(scene_corners[2].x+scene_corners[0].x)/2;
+    pos.y=(scene_corners[2].y+scene_corners[0].y)/2;
+    PRINT(pos.x);
+    PRINT(pos.y);
+  }
+  else
+  {
+    pos.x=-1;
+    pos.y=-1;
+  }
+  return pos;
+
 }
 
 
 position CsurfTemplate::getNewPosition(Mat frame, Rect region)
 { 
-  position pos;
-  return pos;
-/*
- //position CsurfTemplate::getNewPositionSurf(Mat img_1, Mat img_2)
-    if( !img_1.data || !img_2.data )
-    { 
-	std::cout<< " --(!) Error reading images " << std::endl; 
+   Mat imgRegion, tmpROI;
+   position pos;  
+   
+   tmpROI=frame(region);
+   tmpROI.copyTo(imgRegion);
 
-    }
-
-
-
-
-    //-- Step 1: Detect the keypoints using SURF Detector
-    int minHessian = 400;
-    SurfFeatureDetector detector( minHessian );
-    std::vector<KeyPoint> keypoints_1, keypoints_2;
-
-    std::vector< DMatch > good_matches;
-
-    do{ 
-
-    detector.detect( img_1, keypoints_1 );
-    detector.detect( img_2, keypoints_2 );
-
-    //-- Draw keypoints
-
-    Mat img_keypoints_1; Mat img_keypoints_2;
-    drawKeypoints( img_1, keypoints_1, img_keypoints_1, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
-    drawKeypoints( img_2, keypoints_2, img_keypoints_2, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
-
-    //-- Step 2: Calculate descriptors (feature vectors)
-    SurfDescriptorExtractor extractor;
-    Mat descriptors_1, descriptors_2;
-    extractor.compute( img_1, keypoints_1, descriptors_1 );
-    extractor.compute( img_2, keypoints_2, descriptors_2 );
-
-
-    //-- Step 3: Matching descriptor vectors using FLANN matcher
-    FlannBasedMatcher matcher;
-    std::vector< DMatch > matches;
-    matcher.match( descriptors_1, descriptors_2, matches );
-    double max_dist = 0; 
-    double min_dist = 100;
-
-    //-- Quick calculation of max and min distances between keypoints
-    for( int i = 0; i < descriptors_1.rows; i++ )
-    { 
-	double dist = matches[i].distance;
-    if( dist < min_dist )
-	min_dist = dist;
-    if( dist > max_dist ) 
-	max_dist = dist;
-    }
-
-    printf("-- Max dist : %f \n", max_dist );
-    printf("-- Min dist : %f \n", min_dist );
-
-    //-- Draw only "good" matches (i.e. whose distance is less than 2*min_dist )
-    //-- PS.- radiusMatch can also be used here.
-
-
-
-    for( int i = 0; i < descriptors_1.rows; i++ )
-    { 
-	if( matches[i].distance < 2*min_dist )
-	    { 
-		    good_matches.push_back( matches[i]);
-	    }
-    }
-
-    }while(good_matches.size()<50);
-
-    //-- Draw only "good" matches
-    Mat img_matches;
-    drawMatches( img_1, keypoints_1, img_2, keypoints_2,good_matches, img_matches, Scalar::all(-1), Scalar::all(-1),
-    vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-
-    //-- Localize the object
-    std::vector<Point2f> obj;
-    std::vector<Point2f> scene;
-    for( int i = 0; i < good_matches.size(); i++ )
-    {
-    //-- Get the keypoints from the good matches
-    obj.push_back( keypoints_1[ good_matches[i].queryIdx ].pt );
-    scene.push_back( keypoints_2[ good_matches[i].trainIdx ].pt );
-    }
-
-    // se non trova H....sarebbe da usare la vecchia H e disegnarla con un colore diverso
-    Mat H = findHomography( obj, scene, CV_RANSAC );
-
-
-    //-- Get the corners from the image_1 ( the object to be "detected" )
-    std::vector<Point2f> obj_corners(4);
-    obj_corners[0] = cvPoint(0,0); 
-    obj_corners[1] = cvPoint( img_1.cols, 0 );
-    obj_corners[2] = cvPoint( img_1.cols, img_1.rows ); 
-    obj_corners[3] = cvPoint( 0, img_1.rows );
-    std::vector<Point2f> scene_corners(4);
-
-
-    perspectiveTransform( obj_corners, scene_corners, H);
-
-
-    //-- Draw lines between the corners (the mapped object in the scene - image_2 )
-      line( img_matches, scene_corners[0] + Point2f( img_1.cols, 0), scene_corners[1] + Point2f( img_1.cols, 0), Scalar(0, 255, 0), 4 );
-      line( img_matches, scene_corners[1] + Point2f( img_1.cols, 0), scene_corners[2] + Point2f( img_1.cols, 0), Scalar( 0, 255, 0), 4 );
-      line( img_matches, scene_corners[2] + Point2f( img_1.cols, 0), scene_corners[3] + Point2f( img_1.cols, 0), Scalar( 0, 255, 0), 4 );
-      line( img_matches, scene_corners[3] + Point2f( img_1.cols, 0), scene_corners[0] + Point2f( img_1.cols, 0), Scalar( 0, 255, 0), 4 );
-
-    //-- Show detected matches
-    imshow( "Good Matches & Object detection", img_matches );
-
-    for( int i = 0; i < good_matches.size(); i++ )
-      { 
-	printf( "-- Good Match [%d] Keypoint 1: %d  -- Keypoint 2: %d  \n", i, good_matches[i].queryIdx, good_matches[i].trainIdx ); 
-    }
-
-    //waitKey(0);
-
-*/
+   pos=getNewPosition(imgRegion);
+   if (pos.x>=0){
+   pos.x=pos.x+region.x;
+   pos.y=pos.y+region.y;
+   }
+   return pos;
 }

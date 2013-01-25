@@ -16,6 +16,11 @@
 */
 #include "tracker.hpp"
 
+struct surfData {
+   vector< cv::KeyPoint > keypoints;
+   Mat descriptors;
+};
+
 class CsurfTemplate : public CTracker{
    private:
       static position mouseDown;
@@ -23,6 +28,9 @@ class CsurfTemplate : public CTracker{
       static int checkROI;
       Mat imgTemplate;
       static void mouseHandler(int event, int x, int y, int flags, void *param);
+      
+      surfData createSurfData(Mat image);
+      surfData templateSurf;
    public:
       CsurfTemplate(VideoCapture capture,bool colorFilter=false );
       ~CsurfTemplate();
