@@ -252,40 +252,15 @@ position CTemplate::getNewPosition(Mat frame)
 //Look for in the image the center of the region that fits best with the template. It will look for in only in a region
 position CTemplate::getNewPosition(Mat frame, Rect region)
 {
-    Mat imgResult, imgRegion, tmpROI, imgFiltered;
-    double min_val=0, max_val=0;
-    Point min_loc, max_loc;
-    Size resolution;
-    position pos;
-    
-    resolution=Size(frame.cols,frame.rows);
-    
-    tmpROI=frame(region);
-    tmpROI.copyTo(imgRegion);
-	   
-    //Color filter code
-    if (activeColorFilter)
-    {
-	imgFiltered= getFilteredImage(imgRegion);
-        matchTemplate(imgFiltered, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
-    }
-    else{	
-        matchTemplate(imgRegion, imgTemplate, imgResult, CV_TM_CCORR_NORMED);
-    }
-    PUBLISH_WINDOW( "Result", imgResult);
-    minMaxLoc(imgResult, &min_val, &max_val, &min_loc, &max_loc);
-    PRINT(max_val);
-    //printf("%f\n", max_val);
-    if ((max_val>=0.9 && !activeColorFilter) || (max_val>=0.40 && activeColorFilter))
-    {
-        pos.x=float(max_loc.x+(imgTemplate.cols/2)+region.x);
-	pos.y=float(max_loc.y+(imgTemplate.rows/2)+region.y);
-   }
-   else 
-   {
-     pos.x=-1;
-     pos.y=-1;
-   }
+   Mat imgRegion, tmpROI;
+   position pos;  
+   
+   tmpROI=frame(region);
+   tmpROI.copyTo(imgRegion);
+
+   pos=getNewPosition(imgRegion);
+   pos.x=pos.x+region.x;
+   pos.y=pos.y+region.y;
    return pos;
 }
 
