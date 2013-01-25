@@ -28,7 +28,7 @@ CTemplate::CTemplate(VideoCapture capture, bool colorFilter)
   Mat temFrame, tmpROI;
   int c,aux;
   activeColorFilter=colorFilter;
-  cvNamedWindow( "Camera", 1 );
+  namedWindow( "Camera", 1 );
   cvSetMouseCallback( "Camera", mouseHandler, NULL );
     for(;;)
     {
