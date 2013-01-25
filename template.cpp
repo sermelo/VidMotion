@@ -109,12 +109,12 @@ void CTemplate::createHSVFilter(Mat img)
 
   namedWindow( "HSV Filter", 0 );
   cvResizeWindow("HSV Filter", 1200, 680);
-  cvCreateTrackbar("Min Hue", "HSV Filter", &LHue, 255, NULL);
-  cvCreateTrackbar("Min Sat", "HSV Filter", &LSat, 255, NULL);
-  cvCreateTrackbar("Min Val", "HSV Filter", &LVal, 255, NULL);
-  cvCreateTrackbar("Max Hue", "HSV Filter", &HHue, 255, NULL);
-  cvCreateTrackbar("Max Sat", "HSV Filter", &HSat, 255, NULL);
-  cvCreateTrackbar("Max Val", "HSV Filter", &HVal, 255, NULL);
+  createTrackbar("Min Hue", "HSV Filter", &LHue, 255, NULL);
+  createTrackbar("Min Sat", "HSV Filter", &LSat, 255, NULL);
+  createTrackbar("Min Val", "HSV Filter", &LVal, 255, NULL);
+  createTrackbar("Max Hue", "HSV Filter", &HHue, 255, NULL);
+  createTrackbar("Max Sat", "HSV Filter", &HSat, 255, NULL);
+  createTrackbar("Max Val", "HSV Filter", &HVal, 255, NULL);
   while(1){
       //change the brightness of the image
 
