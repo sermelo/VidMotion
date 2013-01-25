@@ -104,7 +104,6 @@ void CTemplate::createHSVFilter(Mat img)
   int HVal=255;
   int c;
   Mat modifiedImg;
-  //modifiedImg=cvCreateImage(cvGetSize(img), img->depth, img->nChannels);
 
   namedWindow( "HSV Filter", 0 );
   cvResizeWindow("HSV Filter", 1200, 680);
