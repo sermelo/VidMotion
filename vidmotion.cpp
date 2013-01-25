@@ -236,16 +236,32 @@ int getRegionOption(int argc, char** argv )
     return result;
 }
 
+int getAlgorithmOption(int argc, char** argv )
+{
+    int result=0;
+    for (int i=0;i<argc;i++)
+    {
+        if (strcmp(argv[i], "-S") == 0)
+        {
+            result=1;
+            break;
+        }
+    }
+    return result;
+}
+
 int main( int argc, char** argv )
 {
-    int camera;
+    int camera, alg;
     bool filter;
     bool reg;
+    CTracker * Pattern;
     Rect region(0, 0, 0, 0);
     //Read optional parameters
     filter=getFilterOption(argc,argv);
     camera=getCameraDevice(argc,argv);
     reg=getRegionOption(argc,argv);
+    alg=getAlgorithmOption(argc,argv);
     
     VideoCapture cap(camera);
     if(!cap.isOpened())// check camera connected succesfully
@@ -256,8 +272,16 @@ int main( int argc, char** argv )
     //Init mouse object
     CCursor Mouse;
     //Init object patern
-//    CTemplate Pattern(cap,filter);
-    CTracker * Pattern=new CTemplate(cap,filter);//=new CsurfTemplate(cap,filter);
+    if (alg==0)
+    {
+        Pattern=new CTemplate(cap,filter);
+	fprintf(stderr,"Choosen normal pattern match algorithm\n");
+    }
+    else if (alg==1)
+    {
+        fprintf(stderr,"Choosen surf argorithm\n");
+        Pattern =new CsurfTemplate(cap,filter);
+    }
     //Select region to explore
     if (reg)
     {
