@@ -26,7 +26,7 @@ class CsurfTemplate : public CTracker{
       static position mouseDown;
       static position mouseUp;
       static int checkROI;
-      Mat imgTemplate;
+
       static void mouseHandler(int event, int x, int y, int flags, void *param);
       
       surfData createSurfData(Mat image);

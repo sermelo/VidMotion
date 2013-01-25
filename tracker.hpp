@@ -48,7 +48,9 @@ struct position {
 };
 
 class CTracker {
-
+   protected:
+       Mat imgTemplate;
+	
    public:
       virtual position getNewPosition(Mat frame)=0;
       virtual position getNewPosition(Mat frame, Rect region)=0;

@@ -48,7 +48,6 @@ class CTemplate : public CTracker{
       static position mouseDown;
       static position mouseUp;
       static int checkROI;
-      Mat imgTemplate;
       bool activeColorFilter;
       Scalar lowFilter;
       Scalar highFilter;
