@@ -40,6 +40,7 @@ destroyWindow(x);
 #include "highgui.h"
 
 using namespace cv;
+using namespace std;
 
 struct position {
    int x;
@@ -49,8 +50,8 @@ struct position {
 class CTracker {
 
    public:
-      position getNewPosition(Mat frame);
-      position getNewPosition(Mat frame, Rect region);
-      Size getSize();
+      virtual position getNewPosition(Mat frame)=0;
+      virtual position getNewPosition(Mat frame, Rect region)=0;
+      virtual Size getSize()=0;
 };
 #endif
