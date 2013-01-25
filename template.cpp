@@ -43,8 +43,7 @@ CTemplate::CTemplate(VideoCapture capture, bool colorFilter)
 	    rectangle(temFrame,
 		    Point(mouseDown.x, mouseDown.y),
 		    Point(mouseUp.x, mouseUp.y),
-		    cvScalar(0, 0, 255, 0), 2, 8, 0);
-	    
+		    Scalar(0, 0, 255, 0), 2, 8, 0);
 	}
         //Case of finished to select a region
 	else if (checkROI==-1)
@@ -52,7 +51,7 @@ CTemplate::CTemplate(VideoCapture capture, bool colorFilter)
 	  rectangle(temFrame,
 		    Point(mouseDown.x, mouseDown.y),
 		    Point(mouseUp.x, mouseUp.y),
-		    cvScalar(0, 0, 255, 0), 2, 8, 0);
+		    Scalar(0, 0, 255, 0), 2, 8, 0);
           if (mouseUp.x<mouseDown.x)
           {
               aux=mouseUp.x;
