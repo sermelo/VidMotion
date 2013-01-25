@@ -66,7 +66,6 @@ class CTemplate{
       ~CTemplate();
       position getNewPosition(Mat frame);
       position getNewPosition(Mat frame, Rect region);
-      position getNewPositionSurf(Mat img_1, Mat img_2);
       Size getSize();
 };
 #endif
