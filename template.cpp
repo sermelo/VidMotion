@@ -211,7 +211,6 @@ void CTemplate::mouseHandler(int event, int x, int y, int flags, void *param)
 //Return template size
 Size CTemplate::getSize(){
   return Size(imgTemplate.cols,imgTemplate.rows);
-  //return cvGetSize(imgTemplate);
 }
 
 //Look for in the image the center of the region that fits best with the template
