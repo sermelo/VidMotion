@@ -29,11 +29,11 @@
 #define PRINT(x) \
 std::cout << #x << ":\t" << x << std::endl;
 #define CREATE_WINDOW(x) \
-cvNamedWindow( x, 1 );
+namedWindow( x, 1 );
 #define PUBLISH_WINDOW(x,y) \
-cvShowImage(x, y);
+imshow(x, y);
 #define CLOSE_WINDOW(x) \
-cvDestroyWindow(x);
+destroyWindow(x);
 #endif
 
 #include "cv.h"
@@ -51,23 +51,22 @@ class CTemplate{
       static position mouseDown;
       static position mouseUp;
       static int checkROI;
-      IplImage* imgTemplate;
+      Mat imgTemplate;
       bool activeColorFilter;
-      CvScalar lowFilter;
-      CvScalar highFilter;
-      IplImage *getFilteredImageSkin(IplImage *original);
-      IplImage *getFilteredImage(IplImage *original);
-      IplImage *getFilteredImage(IplImage *original,CvScalar lowr, CvScalar high);
-      position getMoments(IplImage *img);
-      void createHSVFilter(IplImage *img);
+      Scalar lowFilter;
+      Scalar highFilter;
+      Mat getFilteredImageSkin(Mat original);
+      Mat getFilteredImage(Mat original);
+      Mat getFilteredImage(Mat original,Scalar lowr, Scalar high);
+      void createHSVFilter(Mat img);
       static void mouseHandler(int event, int x, int y, int flags, void *param);
       
    public:
-      CTemplate(CvCapture* capture,bool colorFilter=false );
+      CTemplate(VideoCapture capture,bool colorFilter=false );
       ~CTemplate();
-      position getNewPosition(IplImage * frame);
-      position getNewPosition(IplImage * frame, CvRect region);
+      position getNewPosition(Mat frame);
+      position getNewPosition(Mat frame, Rect region);
       position getNewPositionSurf(Mat img_1, Mat img_2);
-      CvSize getSize();
+      Size getSize();
 };
 #endif
